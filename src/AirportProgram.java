@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 // Interface para ler o arquivo e retornar uma lista de aeroportos
 interface AirportReader {
@@ -66,17 +69,38 @@ class MainFrame extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Inicializar tabela
-        table = new JTable();
-        table.setModel(new DefaultTableModel(
-                new Object[][] {
-                        // Dados dos aeroportos aqui
-                        new List[]{AirportReader.airports}
-                },
-                new String[] {
-                        "aeroportoid", "nome", "cidade", "país", "iata", "icao"
-                }
-        ));
+// Inicializar tabela
+table = new JTable();
+table.setModel(new DefaultTableModel(
+        new Object[][] {
+                // Dados dos aeroportos aqui
+                new List[]{AirportReader.airports}
+        },
+        new String[] {
+                "aeroportoid", "nome", "cidade", "país", "iata", "icao"
+        }
+));
+
+// Ler arquivo CSV
+FileInputStream inputStream = new FileInputStream("aeroportos.csv");
+CSVParser parser = new CSVParser(inputStream, CSVFormat.DEFAULT);
+
+// Percorrer registros
+for (CSVRecord record : parser) {
+    // Obter dados do registro
+    String aeroportoId = record.get("aeroportoId");
+    String nome = record.get("nome");
+    String cidade = record.get("cidade");
+    String pais = record.get("pais");
+    String iata = record.get("iata");
+    String icao = record.get("icao");
+
+    // Adicionar dados à tabela
+    ((DefaultTableModel) table.getModel()).addRow(new Object[] {aeroportoId, nome, cidade, pais, iata, icao});
+}
+
+// Fechar parser
+parser.close();
 
         // Adicionar tabela ao painel de conteúdo
         JScrollPane scrollPane = new JScrollPane(table);
